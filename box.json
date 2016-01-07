@@ -1,0 +1,17 @@
+{
+  "directories": ["src", "vendor"],
+  "main": "bin/JsErrorScanner.php",
+  "output": "bin/JsErrorScanner.phar",
+  "chmod": "0755",
+  "stub": true,
+  "finder": [
+    {
+      "name": "*.php;*.js",
+      "exclude": [
+        "Tests",
+        "tests"
+      ],
+      "in": "vendor"
+    }
+  ]
+}

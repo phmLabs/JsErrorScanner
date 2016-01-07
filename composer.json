@@ -1,0 +1,19 @@
+{
+  "name": "phmlabs/jserrorscanner",
+  "description": "Checks a list of webpages for js errors",
+  "require": {
+    "php": ">= 5.4.0",
+    "symfony/console": "~2.2",
+    "symfony/yaml": "~2.2",
+    "phmlabs/xunitreport": "~1.0.0",
+    "koalamon/koalamonclient": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "whm\\JsErrorScanner\\": "src/"
+    }
+  },
+  "bin": [
+    "bin/JsErrorScanner.php"
+  ]
+}
