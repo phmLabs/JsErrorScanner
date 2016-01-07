@@ -1,0 +1,3 @@
+ignore:
+   - "tracdelight.js: tracdelight.js should be embedded only once! Please check your integration! (:0)s"
+   - "ReferenceError: Can't find variable: ddd (http://www.phmlabs.com/:3)"
