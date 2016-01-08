@@ -13,9 +13,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 use whm\JsErrorScanner\PhantomJS\ErrorRetriever;
-use whm\JsErrorScanner\PhantomJS\HarRetriever;
-use whm\JsErrorScanner\Reporter\Incident;
-use whm\JsErrorScanner\Reporter\XUnit;
 
 class ScanCommand extends Command
 {
@@ -27,6 +24,7 @@ class ScanCommand extends Command
                 new InputOption('koalamon_project', 'p', InputOption::VALUE_OPTIONAL, 'the koalamon project', null),
                 new InputOption('koalamon_project_api_key', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
                 new InputOption('ignore_list', 'i', InputOption::VALUE_OPTIONAL, 'the irgnoe list file', null),
+                new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -40,7 +38,11 @@ class ScanCommand extends Command
     {
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
-        $errorRetriever = new ErrorRetriever();
+        if ($input->getOption('phantomjs_exec')) {
+            $errorRetriever = new ErrorRetriever($input->getOption('phantomjs_exec'));
+        } else {
+            $errorRetriever = new ErrorRetriever();
+        }
         $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 
         $ignores = array();

@@ -13,6 +13,9 @@ class ErrorRetriever
     public function __construct($phantomJSExec = null)
     {
         if (!is_null($phantomJSExec)) {
+            if(!file_exists($phantomJSExec)) {
+                throw new PhantomJsRuntimeException("Unable to find phantomjs executables");
+            }
             $this->phantomJSExec = $phantomJSExec;
         }
 
