@@ -1,103 +1,3 @@
-if (!Date.prototype.toISOString) {
-    Date.prototype.toISOString = function () {
-        function pad(n) {
-            return n < 10 ? '0' + n : n;
-        }
-
-        function ms(n) {
-            return n < 10 ? '00' + n : n < 100 ? '0' + n : n
-        }
-
-        return this.getFullYear() + '-' +
-            pad(this.getMonth() + 1) + '-' +
-            pad(this.getDate()) + 'T' +
-            pad(this.getHours()) + ':' +
-            pad(this.getMinutes()) + ':' +
-            pad(this.getSeconds()) + '.' +
-            ms(this.getMilliseconds()) + 'Z';
-    }
-}
-
-function createHAR(address, title, startTime, resources) {
-    var entries = [];
-
-    resources.forEach(function (resource) {
-        var request = resource.request,
-            startReply = resource.startReply,
-            endReply = resource.endReply;
-
-        if (!request || !startReply || !endReply) {
-            return;
-        }
-
-        // Exclude Data URI from HAR file because
-        // they aren't included in specification
-        if (request.url.match(/(^data:image\/.*)/i)) {
-            return;
-        }
-
-        entries.push({
-            startedDateTime: request.time.toISOString(),
-            time: endReply.time - request.time,
-            request: {
-                method: request.method,
-                url: request.url,
-                httpVersion: "HTTP/1.1",
-                cookies: [],
-                headers: request.headers,
-                queryString: [],
-                headersSize: -1,
-                bodySize: -1
-            },
-            response: {
-                status: endReply.status,
-                statusText: endReply.statusText,
-                httpVersion: "HTTP/1.1",
-                cookies: [],
-                headers: endReply.headers,
-                redirectURL: "",
-                headersSize: -1,
-                bodySize: startReply.bodySize,
-                content: {
-                    size: startReply.bodySize,
-                    mimeType: endReply.contentType
-                }
-            },
-            cache: {},
-            timings: {
-                blocked: 0,
-                dns: -1,
-                connect: -1,
-                send: 0,
-                wait: startReply.time - request.time,
-                receive: endReply.time - startReply.time,
-                ssl: -1
-            },
-            pageref: address
-        });
-    });
-
-    return {
-        log: {
-            version: '1.2',
-            creator: {
-                name: "PhantomJS",
-                version: phantom.version.major + '.' + phantom.version.minor +
-                '.' + phantom.version.patch
-            },
-            pages: [{
-                startedDateTime: startTime.toISOString(),
-                id: address,
-                title: title,
-                pageTimings: {
-                    onLoad: page.endTime - page.startTime
-                }
-            }],
-            entries: entries
-        }
-    };
-}
-
 var page = require('webpage').create(),
     system = require('system');
 
@@ -107,20 +7,22 @@ if (system.args.length === 1) {
 } else {
 
     page.settings.userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36';
+    page.settings.resourceTimeout = 1000;
 
     page.address = system.args[1];
     page.resources = [];
 
     page.onError = function (msg, trace) {
-        // console.log(msg);
-
         var message = msg + ' ';
 
         if (trace && trace.length) {
             message = message + '(' + trace[0].file + ':' + trace[0].line + ')';
         }
-
         console.log(message);
+    };
+
+    page.onResourceTimeout = function (request) {
+        console.log('Response (#' + request.id + '): ' + JSON.stringify(request));
     };
 
     page.open(page.address, function (status) {

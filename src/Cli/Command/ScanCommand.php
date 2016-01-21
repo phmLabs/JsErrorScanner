@@ -23,6 +23,7 @@ class ScanCommand extends Command
                 new InputArgument('url', InputArgument::REQUIRED, 'url to be checked'),
                 new InputOption('koalamon_project', 'p', InputOption::VALUE_OPTIONAL, 'the koalamon project', null),
                 new InputOption('koalamon_project_api_key', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
+                new InputOption('koalamon_system', 's', InputOption::VALUE_OPTIONAL, 'the koalamon system identifier', null),
                 new InputOption('ignore_list', 'i', InputOption::VALUE_OPTIONAL, 'the irgnoe list file', null),
                 new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
             ))
@@ -74,7 +75,13 @@ class ScanCommand extends Command
 
         if ($input->getOption('koalamon_project_api_key')) {
             $reporter = new Reporter($input->getOption('koalamon_project'), $input->getOption('koalamon_project_api_key'), new Client());
-            $system = str_replace('http://', '', $input->getArgument('url'));
+
+            if ($input->getOption('koalamon_system')) {
+                $system = $input->getOption('koalamon_system');
+            } else {
+                $system = str_replace('http://', '', $input->getArgument('url'));
+            }
+
             $event = new Event('JsErrorScanner_' . $system, $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
             $reporter->sendEvent($event, true);
         }
