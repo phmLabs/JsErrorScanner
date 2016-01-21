@@ -82,7 +82,7 @@ class ScanCommand extends Command
                 $system = str_replace('http://', '', $input->getArgument('url'));
             }
 
-            $event = new Event('JsErrorScanner_' . $system, $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
+            $event = new Event('JsErrorScanner_' . $input->getArgument('url'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
             $reporter->sendEvent($event, true);
         }
 
