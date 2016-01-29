@@ -22,7 +22,7 @@ class ScanCommand extends Command
             ->setDefinition(array(
                 new InputArgument('url', InputArgument::REQUIRED, 'url to be checked'),
                 new InputOption('koalamon_project', 'p', InputOption::VALUE_OPTIONAL, 'the koalamon project', null),
-                new InputOption('koalamon_project_api_key', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
+                new InputOption('koalamon_project_api_key', 'a', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
                 new InputOption('koalamon_system', 's', InputOption::VALUE_OPTIONAL, 'the koalamon system identifier', null),
                 new InputOption('koalamon_server', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon server', null),
                 new InputOption('ignore_list', 'i', InputOption::VALUE_OPTIONAL, 'the irgnoe list file', null),
