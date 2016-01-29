@@ -17,5 +17,5 @@ if (!defined('HEAD_COMPOSER_INSTALL')) {
 }
 $loader = require HEAD_COMPOSER_INSTALL;
 
-$app = new \whm\JsErrorScanner\Cli\Application('JsErrorScanner', '0.0.1');
+$app = new \whm\JsErrorScanner\Cli\Application('JsErrorScanner', '##development##');
 $app->run();
