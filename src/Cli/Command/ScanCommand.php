@@ -88,7 +88,7 @@ class ScanCommand extends Command
             }
 
             $event = new Event('JsErrorScanner_' . $input->getArgument('url'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
-            $reporter->sendEvent($event, true);
+            $reporter->sendEvent($event);
         }
 
         $output->writeln('');
