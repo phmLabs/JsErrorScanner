@@ -5,9 +5,6 @@ if (system.args.length === 1) {
     console.log('Usage: error.js <some URL>');
     phantom.exit(1);
 } else {
-
-    // page.settings.userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36';
-
     page.address = system.args[1];
     page.resources = [];
 
@@ -15,14 +12,14 @@ if (system.args.length === 1) {
         var message = msg + ' ';
 
         if (trace && trace.length) {
-            message = message + '(' + trace[0].file + ':' + trace[0].line + ')';
+            message = 'message: ' + message + '; file: ' + trace[0].file + '; line: ' + trace[0].line;
         }
         console.log(message);
     };
 
     page.open(page.address, function (status) {
         if (status !== 'success') {
-            console.log('FAIL to load the address');
+            console.log('FAILED to load the address');
             phantom.exit(1);
         } else {
             phantom.exit();

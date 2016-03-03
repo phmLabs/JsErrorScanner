@@ -25,8 +25,8 @@ class ScanCommand extends Command
                 new InputOption('koalamon_project_api_key', 'a', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
                 new InputOption('koalamon_system', 's', InputOption::VALUE_OPTIONAL, 'the koalamon system identifier', null),
                 new InputOption('koalamon_server', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon server', null),
-                new InputOption('ignore_list', 'i', InputOption::VALUE_OPTIONAL, 'the irgnoe list file', null),
                 new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
+                new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -47,18 +47,28 @@ class ScanCommand extends Command
         }
         $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 
-        $ignores = array();
-        $errorFound = false;
+        $ignoredFiles = [];
+        if ($input->getOption('options')) {
+            $optionArray = json_decode($input->getOption('options'), true);
+            if (array_key_exists('excludedFiles', $optionArray)) {
+                foreach ($optionArray['excludedFiles'] as $excludedFile) {
+                    $ignoredFiles[] = $excludedFile['filename'];
+                }
+            }
 
-        if ($input->getOption('ignore_list')) {
-            $ignoreFile = Yaml::parse(file_get_contents($input->getOption('ignore_list')));
-            $ignores = $ignoreFile['ignore'];
         }
+        $errorFound = false;
 
         if (count($errors) > 0) {
             $errorMsg = 'JavaScript errors (' . count($errors) . ') where found  on ' . $input->getArgument('url') . '<ul>';
+
+
             foreach ($errors as $error) {
-                if (!in_array($error, $ignores)) {
+
+                $start = strpos($error, 'file: ') + 6;
+                $fileName = substr($error, $start, strpos($error, 'line: ') - $start - 2);
+
+                if (!in_array($fileName, $ignoredFiles)) {
                     $output->writeln('  - ' . $error);
                     $errorMsg .= '<li>' . $error . '</li>';
                     $errorFound = true;
