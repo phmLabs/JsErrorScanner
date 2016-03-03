@@ -50,12 +50,14 @@ class ScanCommand extends Command
         $ignoredFiles = [];
         if ($input->getOption('options')) {
             $optionArray = json_decode($input->getOption('options'), true);
-            if (array_key_exists('excludedFiles', $optionArray)) {
-                foreach ($optionArray['excludedFiles'] as $excludedFile) {
-                    $ignoredFiles[] = $excludedFile['filename'];
+
+            if (is_array($optionArray)) {
+                if (array_key_exists('excludedFiles', $optionArray)) {
+                    foreach ($optionArray['excludedFiles'] as $excludedFile) {
+                        $ignoredFiles[] = $excludedFile['filename'];
+                    }
                 }
             }
-
         }
         $errorFound = false;
 
