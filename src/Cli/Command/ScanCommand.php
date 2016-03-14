@@ -64,16 +64,17 @@ class ScanCommand extends Command
         if (count($errors) > 0) {
             $errorMsg = 'JavaScript errors (' . count($errors) . ') where found  on ' . $input->getArgument('url') . '<ul>';
 
-
             foreach ($errors as $error) {
 
                 $start = strpos($error, 'file: ') + 6;
                 $fileName = substr($error, $start, strpos($error, 'line: ') - $start - 2);
 
-                if (!in_array($fileName, $ignoredFiles)) {
-                    $output->writeln('  - ' . $error);
-                    $errorMsg .= '<li>' . $error . '</li>';
-                    $errorFound = true;
+                foreach ($ignoredFiles as $ignoredFile) {
+                    if (!preg_match('^' . $ignoredFile . '^', $fileName)) {
+                        $output->writeln('  - ' . $error);
+                        $errorMsg .= '<li>' . $error . '</li>';
+                        $errorFound = true;
+                    }
                 }
             }
             $errorMsg .= '</ul>';
