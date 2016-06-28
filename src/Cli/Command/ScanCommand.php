@@ -47,6 +47,8 @@ class ScanCommand extends Command
         }
         $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 
+        // var_dump($errors);
+
         $ignoredFiles = [];
         if ($input->getOption('options')) {
             $optionArray = json_decode($input->getOption('options'), true);
@@ -69,11 +71,17 @@ class ScanCommand extends Command
                 $start = strpos($error, 'file: ') + 6;
                 $fileName = substr($error, $start, strpos($error, 'line: ') - $start - 2);
 
-                foreach ($ignoredFiles as $ignoredFile) {
-                    if (!preg_match('^' . $ignoredFile . '^', $fileName)) {
-                        $output->writeln('  - ' . $error);
-                        $errorMsg .= '<li>' . $error . '</li>';
-                        $errorFound = true;
+                if (count($ignoredFiles) == 0) {
+                    $output->writeln('  - ' . $error);
+                    $errorMsg .= '<li>' . $error . '</li>';
+                    $errorFound = true;
+                } else {
+                    foreach ($ignoredFiles as $ignoredFile) {
+                        if (!preg_match('^' . $ignoredFile . '^', $fileName)) {
+                            $output->writeln('  - ' . $error);
+                            $errorMsg .= '<li>' . $error . '</li>';
+                            $errorFound = true;
+                        }
                     }
                 }
             }
