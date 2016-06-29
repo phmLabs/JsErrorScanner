@@ -30,7 +30,7 @@ class ErrorRetriever
 
         exec($command, $output, $exitCode);
 
-        $rawOutput = implode($output, "\n");
+        $rawOutput = implode($output,  "\n");
 
         if ($exitCode > 0) {
             $e = new PhantomJsRuntimeException('Phantom exits with exit code ' . $exitCode . PHP_EOL . $rawOutput);
@@ -38,7 +38,9 @@ class ErrorRetriever
             throw $e;
         }
 
-        return $output;
+        preg_match_all('^###error_begin###(.*?)###error_end###^s', $rawOutput, $matches);
+
+        return $matches[1];
     }
 
     public function __destruct()

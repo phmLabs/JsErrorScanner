@@ -12,7 +12,7 @@ if (system.args.length === 1) {
         var message = msg + ' ';
 
         if (trace && trace.length) {
-            message = 'message: ' + message + '; file: ' + trace[0].file + '; line: ' + trace[0].line;
+            message = '###error_begin###message: ' + message + '; file: ' + trace[0].file + '; line: ' + trace[0].line + '###error_end###';
         }
         console.log(message);
     };

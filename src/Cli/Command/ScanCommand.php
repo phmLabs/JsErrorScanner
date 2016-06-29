@@ -5,6 +5,7 @@ namespace whm\JsErrorScanner\Cli\Command;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;
 use Koalamon\Client\Reporter\Event;
+use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -45,9 +46,8 @@ class ScanCommand extends Command
         } else {
             $errorRetriever = new ErrorRetriever();
         }
-        $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 
-        // var_dump($errors);
+        $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 
         $ignoredFiles = [];
         if ($input->getOption('options')) {
@@ -64,9 +64,10 @@ class ScanCommand extends Command
 
         $errorFound = false;
 
+        $status = Event::STATUS_FAILURE;
+
         if (count($errors) > 0) {
             $errorMsg = 'JavaScript errors (' . count($errors) . ') where found  on ' . $input->getArgument('url') . '<ul>';
-
 
             foreach ($errors as $error) {
 
@@ -86,7 +87,6 @@ class ScanCommand extends Command
                 }
             }
             $errorMsg .= '</ul>';
-            $status = Event::STATUS_FAILURE;
         }
 
         if (!$errorFound) {
@@ -109,7 +109,15 @@ class ScanCommand extends Command
             }
 
             $event = new Event('JsErrorScanner_' . $input->getArgument('url'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
-            $reporter->sendEvent($event);
+
+            try {
+                $reporter->sendEvent($event);
+            } catch (KoalamonException $e) {
+                $output->writeln('');
+                $output->writeln('<error> ' . $e->getMessage() . ' </error>');
+                $output->writeln(' Url: ' . $e->getUrl());
+                $output->writeln(' Payload: ' . $e->getPayload());
+            }
         }
 
         $output->writeln('');
