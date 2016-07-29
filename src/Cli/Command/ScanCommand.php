@@ -91,7 +91,7 @@ class ScanCommand extends Command
 
         if (!$errorFound) {
             $output->writeln('   No errors found.');
-            $errorMsg = '';
+            $errorMsg = 'No javascript errors found for ' . $input->getArgument('url');
             $status = Event::STATUS_SUCCESS;
         }
 
