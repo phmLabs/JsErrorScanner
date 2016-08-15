@@ -67,7 +67,7 @@ class ScanCommand extends Command
         $status = Event::STATUS_FAILURE;
 
         if (count($errors) > 0) {
-            $errorMsg = 'JavaScript errors (' . count($errors) . ') were found  on ' . $input->getArgument('url') . '<ul>';
+            $errorMsg = 'JavaScript errors (' . count($errors) . ') were found on ' . $input->getArgument('url') . '<ul>';
 
             foreach ($errors as $error) {
 
