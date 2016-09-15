@@ -28,6 +28,7 @@ class ScanCommand extends Command
                 new InputOption('koalamon_server', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon server', null),
                 new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
+                new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -108,7 +109,7 @@ class ScanCommand extends Command
                 $system = str_replace('http://', '', $input->getArgument('url'));
             }
 
-            $event = new Event('JsErrorScanner_' . $input->getArgument('url'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors));
+            $event = new Event('JsErrorScanner_' . $input->getArgument('url'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors), null, $input->getOption('component'));
 
             try {
                 $reporter->sendEvent($event);
