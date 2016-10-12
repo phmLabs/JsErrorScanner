@@ -1,6 +1,6 @@
 <?php
 
-namespace whm\JsErrorScanner\PhantomJS;
+namespace whm\JsErrorScanner\ErrorRetriever\PhantomJS;
 
 class PhantomJsRuntimeException extends \RuntimeException
 {

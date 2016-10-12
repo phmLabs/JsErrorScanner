@@ -12,8 +12,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Yaml\Yaml;
-use whm\JsErrorScanner\PhantomJS\ErrorRetriever;
+use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
+use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
+
 
 class ScanCommand extends Command
 {
@@ -29,6 +30,7 @@ class ScanCommand extends Command
                 new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
+                new InputOption('retriever', 'r', InputOption::VALUE_OPTIONAL, '(phantom|chrome)', 'phantom'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -42,11 +44,13 @@ class ScanCommand extends Command
     {
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
-        if ($input->getOption('phantomjs_exec')) {
-            $errorRetriever = new ErrorRetriever($input->getOption('phantomjs_exec'));
+        if ($input->getOption('retriever') === 'chrome') {
+            $errorRetriever = new ChromeErrorRetriever('http://localhost', 4444);
         } else {
-            $errorRetriever = new ErrorRetriever();
+            $errorRetriever = new PhantomErrorRetriever($input->getOption('phantomjs_exec'));
         }
+
+        /** @var ErrorRetriever $errorRetriever */
 
         $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
 

@@ -1,10 +1,11 @@
 <?php
 
-namespace whm\JsErrorScanner\PhantomJS;
+namespace whm\JsErrorScanner\ErrorRetriever\PhantomJS;
 
 use Psr\Http\Message\UriInterface;
+use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
-class ErrorRetriever
+class PhantomErrorRetriever implements ErrorRetriever
 {
     private $phantomJSExec = 'phantomjs';
     private $errorJsFile = 'errors.js';
@@ -13,7 +14,7 @@ class ErrorRetriever
     public function __construct($phantomJSExec = null)
     {
         if (!is_null($phantomJSExec)) {
-            if(!file_exists($phantomJSExec)) {
+            if (!file_exists($phantomJSExec)) {
                 throw new PhantomJsRuntimeException("Unable to find phantomjs executables");
             }
             $this->phantomJSExec = $phantomJSExec;
@@ -30,7 +31,7 @@ class ErrorRetriever
 
         exec($command, $output, $exitCode);
 
-        $rawOutput = implode($output,  "\n");
+        $rawOutput = implode($output, "\n");
 
         if ($exitCode > 0) {
             $e = new PhantomJsRuntimeException('Phantom exits with exit code ' . $exitCode . PHP_EOL . $rawOutput);

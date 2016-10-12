@@ -6,7 +6,8 @@
     "symfony/console": "~2.2",
     "symfony/yaml": "~2.2",
     "phmlabs/xunitreport": "~1.0.0",
-    "koalamon/koalamonclient": "dev-master"
+    "koalamon/koalamonclient": "dev-master",
+    "facebook/webdriver": "1.1.*"
   },
   "autoload": {
     "psr-4": {
