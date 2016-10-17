@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
 
@@ -28,6 +29,8 @@ class ScanCommand extends Command
                 new InputOption('koalamon_system', 's', InputOption::VALUE_OPTIONAL, 'the koalamon system identifier', null),
                 new InputOption('koalamon_server', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon server', null),
                 new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
+                new InputOption('selenium_server', 'u', InputOption::VALUE_OPTIONAL, 'the selenium server url, ', 'http://localhost'),
+                new InputOption('selenium_server_port', 'i', InputOption::VALUE_OPTIONAL, 'the selenium server port, ', 4444),
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
                 new InputOption('retriever', 'r', InputOption::VALUE_OPTIONAL, '(phantom|chrome)', 'phantom'),
@@ -45,7 +48,7 @@ class ScanCommand extends Command
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
         if ($input->getOption('retriever') === 'chrome') {
-            $errorRetriever = new ChromeErrorRetriever('http://localhost', 4444);
+            $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'));
         } else {
             $errorRetriever = new PhantomErrorRetriever($input->getOption('phantomjs_exec'));
         }
