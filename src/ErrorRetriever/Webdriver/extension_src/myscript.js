@@ -4,7 +4,7 @@
 
 localStorage.setItem("js_errors", "");
 
-var jserror_debug = true;
+var jserror_debug = false;
 
 function domToString(element, maxDepth, currentDepth) {
 
@@ -30,7 +30,11 @@ function domToString(element, maxDepth, currentDepth) {
 }
 
 window.addEventListener("error", function (error) {
-    message = error.message + ' (filename: ' + error.filename + '::' + error.lineno + ')';
+    filename = error.filename;
+    if (filename == "") {
+        filename = 'NO_FILENAME_SET_BY_CHROME';
+    }
+    message = error.message + ' (filename: ' + filename + '::' + error.lineno + ')';
     console.log('Leankoala: ' + message);
     if (localStorage.getItem("js_errors") == "") {
         localStorage.setItem("js_errors", message);
