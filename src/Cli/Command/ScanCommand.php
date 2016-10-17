@@ -79,12 +79,9 @@ class ScanCommand extends Command
 
             foreach ($errors as $error) {
 
-                $start = strpos($error, 'file: ') + 6;
-                $fileName = substr($error, $start, strpos($error, 'line: ') - $start - 2);
-
                 $ignored = false;
                 foreach ($ignoredFiles as $ignoredFile) {
-                    if (preg_match('^' . $ignoredFile . '^', $fileName)) {
+                    if (preg_match('^' . $ignoredFile . '^', $error)) {
                         $ignored = true;
                     }
                 }
