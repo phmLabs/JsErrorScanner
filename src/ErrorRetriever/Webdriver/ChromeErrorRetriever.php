@@ -13,7 +13,7 @@ class ChromeErrorRetriever implements ErrorRetriever
     private $host;
     private $port;
 
-    public function __construct($host, $port)
+    public function __construct($host = 'http://localhost', $port = 4444)
     {
         $this->port = $port;
         $this->host = $host;
@@ -52,6 +52,8 @@ class ChromeErrorRetriever implements ErrorRetriever
         (Exception $e) {
             $filteredErrors[] = "Selenium/Webdriver crashed." . $e->getMessage();
         }
+
+        $driver->quit();
 
         return $filteredErrors;
     }
