@@ -48,9 +48,8 @@ class ChromeErrorRetriever implements ErrorRetriever
                 }
             }
 
-        } catch
-        (Exception $e) {
-            $filteredErrors[] = "Selenium/Webdriver crashed." . $e->getMessage();
+        } catch (\Exception $e) {
+            $filteredErrors[] = "Selenium/Webdriver crashed. " . $e->getMessage();
         }
 
         $driver->quit();
