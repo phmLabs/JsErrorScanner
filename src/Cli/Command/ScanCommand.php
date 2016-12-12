@@ -47,7 +47,7 @@ class ScanCommand extends Command
     {
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
-        $options = $input->getOption('options');
+        $options = json_decode($input->getOption('options'), true);
 
         if (!array_key_exists('browser', $options) || $options['browser'] === 'chrome') {
             $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'));
