@@ -47,7 +47,9 @@ class ScanCommand extends Command
     {
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
-        if ($input->getOption('options')['browser'] === 'chrome') {
+        $options = $input->getOption('options');
+
+        if (!array_key_exists('browser', $options) || $options['browser'] === 'chrome') {
             $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'));
         } else {
             $errorRetriever = new PhantomErrorRetriever($input->getOption('phantomjs_exec'));
@@ -60,9 +62,6 @@ class ScanCommand extends Command
         $ignoredFiles = [];
         if ($input->getOption('options')) {
             $optionArray = json_decode($input->getOption('options'), true);
-
-            var_dump($optionArray);
-            var_dump($input->getOption('options'));
 
             if (is_array($optionArray)) {
                 if (array_key_exists('excludedFiles', $optionArray)) {
@@ -83,8 +82,6 @@ class ScanCommand extends Command
             foreach ($errors as $error) {
 
                 $ignored = false;
-
-                var_dump($ignoredFiles);
 
                 foreach ($ignoredFiles as $ignoredFile) {
                     if (preg_match('^' . $ignoredFile . '^', $error)) {
