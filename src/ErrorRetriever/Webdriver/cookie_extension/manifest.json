@@ -1,0 +1,19 @@
+{
+  "name": "Set Cookie Extentsion",
+  "version": "0.1",
+  "description": "Set a cookie via url parameter",
+  "permissions": [
+    "cookies",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "manifest_version": 2
+}

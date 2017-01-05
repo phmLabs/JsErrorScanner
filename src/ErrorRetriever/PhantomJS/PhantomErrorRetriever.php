@@ -2,7 +2,7 @@
 
 namespace whm\JsErrorScanner\ErrorRetriever\PhantomJS;
 
-use Psr\Http\Message\UriInterface;
+use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
 class PhantomErrorRetriever implements ErrorRetriever
@@ -25,9 +25,9 @@ class PhantomErrorRetriever implements ErrorRetriever
         copy(__DIR__ . '/' . $this->errorJsFile, $this->errorJsTempFile);
     }
 
-    public function getErrors(UriInterface $uri)
+    public function getErrors(Uri $uri)
     {
-        $command = $this->phantomJSExec . ' ' . $this->errorJsTempFile . ' ' . (string)$uri;
+        $command = $this->phantomJSExec . ' ' . $this->errorJsTempFile . ' ' . (string)$uri . " '" . $uri->getCookieString() . "'";
 
         exec($command, $output, $exitCode);
 

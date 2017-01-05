@@ -3,7 +3,7 @@
 namespace whm\JsErrorScanner\Cli\Command;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Uri;
+
 use Koalamon\Client\Reporter\Event;
 use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use whm\Html\Uri;
+use whm\JsErrorScanner\CookieMaker\CookieMaker;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
@@ -33,7 +35,7 @@ class ScanCommand extends Command
                 new InputOption('selenium_server_port', 'i', InputOption::VALUE_OPTIONAL, 'the selenium server port, ', 4444),
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
-                // new InputOption('retriever', 'r', InputOption::VALUE_OPTIONAL, '(phantom|chrome)', 'phantom'),
+                new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -57,7 +59,15 @@ class ScanCommand extends Command
 
         /** @var ErrorRetriever $errorRetriever */
 
-        $errors = $errorRetriever->getErrors(new Uri($input->getArgument('url')));
+        $uri = new Uri($input->getArgument('url'));
+
+        if ($input->getOption('login')) {
+            $cookies = new CookieMaker();
+            $cookies = $cookies->getCookies($input->getOption('login'));
+            $uri->addCookies($cookies);
+        }
+
+        $errors = $errorRetriever->getErrors($uri);
 
         $ignoredFiles = [];
         if ($input->getOption('options')) {

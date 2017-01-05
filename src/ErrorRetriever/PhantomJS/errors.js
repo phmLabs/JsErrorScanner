@@ -8,6 +8,10 @@ if (system.args.length === 1) {
     page.address = system.args[1];
     page.resources = [];
 
+    if (system.args[2]) {
+        page.customHeaders = {'cookie': system.args[2]};
+    }
+
     page.onError = function (msg, trace) {
         var message = msg + ' ';
 
@@ -15,6 +19,10 @@ if (system.args.length === 1) {
             message = '###error_begin###message: ' + message + '; file: ' + trace[0].file + '; line: ' + trace[0].line + '###error_end###';
         }
         console.log(message);
+    };
+
+    page.onInitialized = function () {
+        page.customHeaders = {};
     };
 
     page.open(page.address, function (status) {
