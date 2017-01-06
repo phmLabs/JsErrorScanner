@@ -1,6 +1,6 @@
 <?php
 
-// php bin/JsErrorScanner.php scan -p some-project -a '416C70E7-B3B5-4CF0-8B98-16C57843E40F' -s 101 'https://www.thewebhatesme.com/wp-admin/' -k https://monitor.leankoala.com/webhook/ -o '{"browser":"chrome"}' -c 102 -u localhost -l '{"name":"User: Nils (Capital N)","action":"https:\/\/www.thewebhatesme.com\/wp-login.php","url":"https:\/\/www.thewebhatesme.com\/wp-login.php","fields":{"log":"Nils","pwd":"langner"}}' -v
+// php bin/JsErrorScanner.php scan -p some-project -a '416C70E7-B3B5-4CF0-8B98-16C57843E40F' -s 101 'http://yuscale.com' -k https://monitor.leankoala.com/webhook/ -o '{"browser":"chrome"}' -c 102 -u localhost -l '{"name":"User: Nils (Capital N)","action":"https:\/\/www.thewebhatesme.com\/wp-login.php","url":"https:\/\/www.thewebhatesme.com\/wp-login.php","fields":{"log":"Nils","pwd":"langner"}}' -v
 // php bin/JsErrorScanner.php scan -p some-project -a '416C70E7-B3B5-4CF0-8B98-16C57843E40F' -s 101 'https://www.thewebhatesme.com/wp-admin/' -k https://monitor.leankoala.com/webhook/ -o '{"browser":"phantom"}' -c 102 -u localhost -l '{"name":"User: Nils (Capital N)","action":"https:\/\/www.thewebhatesme.com\/wp-login.php","url":"https:\/\/www.thewebhatesme.com\/wp-login.php","fields":{"log":"Nils","pwd":"langner"}}' -v
 
 namespace whm\JsErrorScanner\ErrorRetriever\Webdriver;
@@ -36,8 +36,6 @@ class ChromeErrorRetriever implements ErrorRetriever
         $caps = DesiredCapabilities::chrome();
         $caps->setCapability(ChromeOptions::CAPABILITY, $options);
 
-        $driver = RemoteWebDriver::create($host, $caps);
-
         $filteredErrors = [];
 
         if ($uri->getCookieString()) {
@@ -47,6 +45,7 @@ class ChromeErrorRetriever implements ErrorRetriever
         }
 
         try {
+            $driver = RemoteWebDriver::create($host, $caps);
             $driver->get($preparedUri);
 
             $errors = $driver->executeScript("return localStorage.getItem(\"js_errors\")", array());
@@ -63,7 +62,9 @@ class ChromeErrorRetriever implements ErrorRetriever
             $filteredErrors[] = "Selenium/Webdriver crashed. " . $e->getMessage();
         }
 
-        $driver->quit();
+        if ($driver) {
+            $driver->quit();
+        }
 
         return $filteredErrors;
     }

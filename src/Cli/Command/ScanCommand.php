@@ -7,13 +7,13 @@ use GuzzleHttp\Client;
 use Koalamon\Client\Reporter\Event;
 use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
+use Koalamon\CookieMakerHelper\CookieMaker;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use whm\Html\Uri;
-use whm\JsErrorScanner\CookieMaker\CookieMaker;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
@@ -83,8 +83,8 @@ class ScanCommand extends Command
         }
 
         $errorFound = false;
-
         $status = Event::STATUS_FAILURE;
+        $errorMsg = "";
 
         if (count($errors) > 0) {
             $errorMsg = 'JavaScript errors (' . count($errors) . ') were found on ' . $input->getArgument('url') . '<ul>';
