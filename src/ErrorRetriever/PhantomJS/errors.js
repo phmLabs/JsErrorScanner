@@ -21,10 +21,6 @@ if (system.args.length === 1) {
         console.log(message);
     };
 
-    page.onInitialized = function () {
-        page.customHeaders = {};
-    };
-
     page.open(page.address, function (status) {
         if (status !== 'success') {
             console.log('FAILED to load the address');
