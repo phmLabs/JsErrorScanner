@@ -17,6 +17,7 @@ use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
+use whm\JsErrorScanner\ErrorRetriever\Webdriver\SeleniumCrashException;
 
 
 class ScanCommand extends Command
@@ -36,6 +37,7 @@ class ScanCommand extends Command
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
+                new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/var/log/jserrorscanner.log'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -67,7 +69,14 @@ class ScanCommand extends Command
             $uri->addCookies($cookies);
         }
 
-        $errors = $errorRetriever->getErrors($uri);
+        try {
+            $errors = $errorRetriever->getErrors($uri);
+        } catch (SeleniumCrashException $e) {
+            $handle = fopen($input->getOption('errorLog'), 'a');
+            fputcsv($handle, [date('Y-m-d H:i:s'), (string)$uri, $e->getMessage()], ';');
+            $output->writeln("<error>" . $e->getMessage() . "\n</error>");
+            exit(1);
+        }
 
         $ignoredFiles = [];
         if ($input->getOption('options')) {

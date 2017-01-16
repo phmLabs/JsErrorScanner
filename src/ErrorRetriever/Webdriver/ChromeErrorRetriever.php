@@ -49,20 +49,19 @@ class ChromeErrorRetriever implements ErrorRetriever
             $driver->get($preparedUri);
 
             $errors = $driver->executeScript("return localStorage.getItem(\"js_errors\")", array());
-
-            $errorList = explode('###', $errors);
-
-            foreach ($errorList as $errorElement) {
-                if ($errorElement != "") {
-                    $filteredErrors[] = trim($errorElement);
-                }
-            }
-
         } catch (\Exception $e) {
-            $filteredErrors[] = "Selenium/Webdriver crashed. " . $e->getMessage();
+            throw new SeleniumCrashException($e->getMessage());
         }
 
-        if ($driver) {
+        $errorList = explode('###', $errors);
+
+        foreach ($errorList as $errorElement) {
+            if ($errorElement != "") {
+                $filteredErrors[] = trim($errorElement);
+            }
+        }
+
+        if (isset($driver)) {
             $driver->quit();
         }
 
