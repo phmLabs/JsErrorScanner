@@ -31,6 +31,11 @@ function domToString(element, maxDepth, currentDepth) {
 
 window.addEventListener("error", function (error) {
     filename = error.filename;
+
+    if (filename == "" && error.lineno == 0) {
+        return;
+    }
+
     if (filename == "") {
         filename = 'NO_FILENAME_SET_BY_CHROME';
     }
