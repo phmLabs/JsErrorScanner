@@ -50,6 +50,9 @@ class ChromeErrorRetriever implements ErrorRetriever
 
             $errors = $driver->executeScript("return localStorage.getItem(\"js_errors\")", array());
         } catch (\Exception $e) {
+            if (isset($driver)) {
+                $driver->quit();
+            }
             throw new SeleniumCrashException($e->getMessage());
         }
 
