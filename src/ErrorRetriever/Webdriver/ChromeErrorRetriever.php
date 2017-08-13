@@ -30,7 +30,8 @@ class ChromeErrorRetriever implements ErrorRetriever
 
         $options->addExtensions(array(
             __DIR__ . '/extension/console2var.crx',
-            __DIR__ . '/cookie_crx/cookie_extension.crx'
+            __DIR__ . '/cookie_crx/cookie_extension.crx',
+            __DIR__ . '/../../../vendor/phmlabs/httpwebdriveradapter/src/Http/Client/Chrome/extension/filter.crx'
         ));
 
         $caps = DesiredCapabilities::chrome();

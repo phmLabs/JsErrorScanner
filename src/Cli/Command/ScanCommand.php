@@ -37,7 +37,7 @@ class ScanCommand extends Command
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
-                new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/var/log/jserrorscanner.log'),
+                new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/tmp/log/jserrorscanner.log'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
