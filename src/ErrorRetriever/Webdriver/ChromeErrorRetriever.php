@@ -5,9 +5,10 @@
 
 namespace whm\JsErrorScanner\ErrorRetriever\Webdriver;
 
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
+use GuzzleHttp\Psr7\Request;
+use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeClient;
+use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeResponse;
+use phm\HttpWebdriverClient\Http\Client\Decorator\FileCacheDecorator;
 use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
@@ -24,20 +25,8 @@ class ChromeErrorRetriever implements ErrorRetriever
 
     public function getErrors(Uri $uri)
     {
-        $host = $this->host . ':' . $this->port . '/wd/hub';
-
-        $options = new ChromeOptions();
-
-        $options->addExtensions(array(
-            __DIR__ . '/extension/console2var.crx',
-            __DIR__ . '/cookie_crx/cookie_extension.crx',
-            __DIR__ . '/../../../vendor/phmlabs/httpwebdriveradapter/src/Http/Client/Chrome/extension/filter.crx'
-        ));
-
-        $caps = DesiredCapabilities::chrome();
-        $caps->setCapability(ChromeOptions::CAPABILITY, $options);
-
-        $filteredErrors = [];
+        $chromeClient = new ChromeClient($this->host, $this->port);
+        $cachedClient = new FileCacheDecorator($chromeClient);
 
         if ($uri->getCookieString()) {
             $preparedUri = (string)$uri . '#cookie=' . $uri->getCookieString();
@@ -46,10 +35,10 @@ class ChromeErrorRetriever implements ErrorRetriever
         }
 
         try {
-            $driver = RemoteWebDriver::create($host, $caps);
-            $driver->get($preparedUri);
-
-            $errors = $driver->executeScript("return localStorage.getItem(\"js_errors\")", array());
+            $headers = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
+            $response = $cachedClient->sendRequest(new Request('GET', $preparedUri, $headers));
+            /** @var ChromeResponse $response */
+            $errors = $response->getJavaScriptErrors();
         } catch (\Exception $e) {
             if (isset($driver)) {
                 $driver->quit();
@@ -58,6 +47,8 @@ class ChromeErrorRetriever implements ErrorRetriever
         }
 
         $errorList = explode('###', $errors);
+
+        $filteredErrors = [];
 
         foreach ($errorList as $errorElement) {
             if ($errorElement != "") {

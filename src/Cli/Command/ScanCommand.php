@@ -72,8 +72,6 @@ class ScanCommand extends Command
         try {
             $errors = $errorRetriever->getErrors($uri);
         } catch (SeleniumCrashException $e) {
-            $handle = fopen($input->getOption('errorLog'), 'a');
-            fputcsv($handle, [date('Y-m-d H:i:s'), (string)$uri, $e->getMessage()], ';');
             $output->writeln("<error>" . $e->getMessage() . "\n</error>");
             exit(1);
         }
