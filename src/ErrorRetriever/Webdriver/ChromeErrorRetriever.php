@@ -28,15 +28,9 @@ class ChromeErrorRetriever implements ErrorRetriever
         $chromeClient = new ChromeClient($this->host, $this->port);
         $cachedClient = new FileCacheDecorator($chromeClient);
 
-        if ($uri->getCookieString()) {
-            $preparedUri = (string)$uri . '#cookie=' . $uri->getCookieString();
-        } else {
-            $preparedUri = (string)$uri;
-        }
-
         try {
             $headers = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
-            $response = $cachedClient->sendRequest(new Request('GET', $preparedUri, $headers));
+            $response = $cachedClient->sendRequest(new Request('GET', $uri, $headers));
             /** @var ChromeResponse $response */
             $errors = $response->getJavaScriptErrors();
         } catch (\Exception $e) {
