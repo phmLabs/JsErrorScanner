@@ -72,7 +72,7 @@ class ScanCommand extends Command
         try {
             $errors = $errorRetriever->getErrors($uri);
         } catch (SeleniumCrashException $e) {
-            $output->writeln("<error>" . $e->getMessage() . "\n</error>");
+            $output->writeln(" <error> " . $e->getMessage() . " \n</error>");
             exit(1);
         }
 

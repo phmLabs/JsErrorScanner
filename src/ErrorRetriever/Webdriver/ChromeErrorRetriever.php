@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Request;
 use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeClient;
 use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeResponse;
 use phm\HttpWebdriverClient\Http\Client\Decorator\FileCacheDecorator;
+use phm\HttpWebdriverClient\Http\Client\Decorator\LoggerDecorator;
 use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
@@ -26,17 +27,16 @@ class ChromeErrorRetriever implements ErrorRetriever
     public function getErrors(Uri $uri)
     {
         $chromeClient = new ChromeClient($this->host, $this->port);
-        $cachedClient = new FileCacheDecorator($chromeClient);
+        $client  = new FileCacheDecorator($chromeClient);
+        // $client = new LoggerDecorator($cachedClient);
 
         try {
             $headers = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
-            $response = $cachedClient->sendRequest(new Request('GET', $uri, $headers));
+            $response = $client->sendRequest(new Request('GET', $uri, $headers));
             /** @var ChromeResponse $response */
             $errors = $response->getJavaScriptErrors();
         } catch (\Exception $e) {
-            if (isset($driver)) {
-                $driver->quit();
-            }
+            $client->close();
             throw new SeleniumCrashException($e->getMessage());
         }
 
@@ -50,9 +50,7 @@ class ChromeErrorRetriever implements ErrorRetriever
             }
         }
 
-        if (isset($driver)) {
-            $driver->quit();
-        }
+        $client->close();
 
         return $filteredErrors;
     }
