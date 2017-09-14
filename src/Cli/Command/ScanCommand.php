@@ -38,6 +38,7 @@ class ScanCommand extends Command
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
                 new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/tmp/log/jserrorscanner.log'),
+                new InputOption('nocache', null, InputOption::VALUE_NONE, 'disable cache'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -54,7 +55,7 @@ class ScanCommand extends Command
         $options = json_decode($input->getOption('options'), true);
 
         if (!array_key_exists('browser', $options) || $options['browser'] === 'chrome') {
-            $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'));
+            $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'),$input->getOption('nocache') );
         } else {
             $errorRetriever = new PhantomErrorRetriever($input->getOption('phantomjs_exec'));
         }

@@ -17,18 +17,23 @@ class ChromeErrorRetriever implements ErrorRetriever
 {
     private $host;
     private $port;
+    private $nocache;
 
-    public function __construct($host = 'http://localhost', $port = 4444)
+    public function __construct($host = 'http://localhost', $port = 4444, $nocache = false)
     {
         $this->port = $port;
         $this->host = $host;
+        $this->nocache = $nocache;
     }
 
     public function getErrors(Uri $uri)
     {
-        $chromeClient = new ChromeClient($this->host, $this->port);
-        $client  = new FileCacheDecorator($chromeClient);
-        // $client = new LoggerDecorator($cachedClient);
+        if ($this->nocache) {
+            $client = new ChromeClient($this->host, $this->port);
+        } else {
+            $chromeClient = new ChromeClient($this->host, $this->port);
+            $client = new FileCacheDecorator($chromeClient);
+        }
 
         try {
             $headers = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
