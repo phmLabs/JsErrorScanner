@@ -6,10 +6,9 @@
 namespace whm\JsErrorScanner\ErrorRetriever\Webdriver;
 
 use GuzzleHttp\Psr7\Request;
-use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeClient;
 use phm\HttpWebdriverClient\Http\Client\Chrome\ChromeResponse;
 use phm\HttpWebdriverClient\Http\Client\Decorator\FileCacheDecorator;
-use phm\HttpWebdriverClient\Http\Client\Decorator\LoggerDecorator;
+use phm\HttpWebdriverClient\Http\Client\HeadlessChrome\HeadlessChromeClient;
 use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
@@ -29,9 +28,9 @@ class ChromeErrorRetriever implements ErrorRetriever
     public function getErrors(Uri $uri)
     {
         if ($this->nocache) {
-            $client = new ChromeClient($this->host, $this->port);
+            $client = new HeadlessChromeClient();
         } else {
-            $chromeClient = new ChromeClient($this->host, $this->port);
+            $chromeClient = new HeadlessChromeClient();
             $client = new FileCacheDecorator($chromeClient);
         }
 
@@ -45,18 +44,8 @@ class ChromeErrorRetriever implements ErrorRetriever
             throw new SeleniumCrashException($e->getMessage());
         }
 
-        $errorList = explode('###', $errors);
-
-        $filteredErrors = [];
-
-        foreach ($errorList as $errorElement) {
-            if ($errorElement != "") {
-                $filteredErrors[] = trim($errorElement);
-            }
-        }
-
         $client->close();
 
-        return $filteredErrors;
+        return $errors;
     }
 }
