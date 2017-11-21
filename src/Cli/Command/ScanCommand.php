@@ -31,10 +31,8 @@ class ScanCommand extends Command
                 new InputOption('koalamon_project_api_key', 'a', InputOption::VALUE_OPTIONAL, 'the koalamon api key', null),
                 new InputOption('koalamon_system', 's', InputOption::VALUE_OPTIONAL, 'the koalamon system identifier', null),
                 new InputOption('koalamon_server', 'k', InputOption::VALUE_OPTIONAL, 'the koalamon server', null),
-                new InputOption('phantomjs_exec', 'j', InputOption::VALUE_OPTIONAL, 'the phantom js executable file', null),
-                new InputOption('selenium_server', 'u', InputOption::VALUE_OPTIONAL, 'the selenium server url, ', 'http://localhost'),
-                new InputOption('selenium_server_port', 'i', InputOption::VALUE_OPTIONAL, 'the selenium server port, ', 4444),
                 new InputOption('options', 'o', InputOption::VALUE_OPTIONAL, 'koalamon options', null),
+                new InputOption('client_timeout', 't', InputOption::VALUE_OPTIONAL, 'headless crhome timeout', 31000),
                 new InputOption('component', 'c', InputOption::VALUE_OPTIONAL, 'koalamon component id', null),
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
                 new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/tmp/log/jserrorscanner.log'),
@@ -54,14 +52,9 @@ class ScanCommand extends Command
 
         $options = json_decode($input->getOption('options'), true);
 
-        if (!array_key_exists('browser', $options) || $options['browser'] === 'chrome') {
-            $errorRetriever = new ChromeErrorRetriever($input->getOption('selenium_server'), $input->getOption('selenium_server_port'),$input->getOption('nocache') );
-        } else {
-            $errorRetriever = new PhantomErrorRetriever($input->getOption('phantomjs_exec'));
-        }
+        $errorRetriever = new ChromeErrorRetriever($input->getOption('nocache'), $input->getOption('client_timeout'));
 
         /** @var ErrorRetriever $errorRetriever */
-
         $uri = new Uri($input->getArgument('url'));
 
         if ($input->getOption('login')) {
@@ -78,14 +71,11 @@ class ScanCommand extends Command
         }
 
         $ignoredFiles = [];
-        if ($input->getOption('options')) {
-            $optionArray = json_decode($input->getOption('options'), true);
 
-            if (is_array($optionArray)) {
-                if (array_key_exists('excludedFiles', $optionArray)) {
-                    foreach ($optionArray['excludedFiles'] as $excludedFile) {
-                        $ignoredFiles[] = $excludedFile['filename'];
-                    }
+        if (is_array($options)) {
+            if (array_key_exists('excludedFiles', $options)) {
+                foreach ($options['excludedFiles'] as $excludedFile) {
+                    $ignoredFiles[] = $excludedFile['filename'];
                 }
             }
         }

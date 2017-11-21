@@ -14,23 +14,22 @@ use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
 class ChromeErrorRetriever implements ErrorRetriever
 {
-    private $host;
+    private $clientTimeout;
     private $port;
     private $nocache;
 
-    public function __construct($host = 'http://localhost', $port = 4444, $nocache = false)
+    public function __construct($nocache = false, $clientTimeout = 31000)
     {
-        $this->port = $port;
-        $this->host = $host;
+        $this->clientTimeout = $clientTimeout;
         $this->nocache = $nocache;
     }
 
     public function getErrors(Uri $uri)
     {
         if ($this->nocache) {
-            $client = new HeadlessChromeClient();
+            $client = new HeadlessChromeClient($this->clientTimeout);
         } else {
-            $chromeClient = new HeadlessChromeClient();
+            $chromeClient = new HeadlessChromeClient($this->clientTimeout);
             $client = new FileCacheDecorator($chromeClient);
         }
 
