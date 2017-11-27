@@ -15,7 +15,6 @@ use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 class ChromeErrorRetriever implements ErrorRetriever
 {
     private $clientTimeout;
-    private $port;
     private $nocache;
 
     public function __construct($nocache = false, $clientTimeout = 31000)
@@ -24,7 +23,7 @@ class ChromeErrorRetriever implements ErrorRetriever
         $this->nocache = $nocache;
     }
 
-    public function getErrors(Uri $uri)
+    public function getResponse(Uri $uri)
     {
         if ($this->nocache) {
             $client = new HeadlessChromeClient($this->clientTimeout);
@@ -37,7 +36,6 @@ class ChromeErrorRetriever implements ErrorRetriever
             $headers = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
             $response = $client->sendRequest(new Request('GET', $uri, $headers));
             /** @var ChromeResponse $response */
-            $errors = $response->getJavaScriptErrors();
         } catch (\Exception $e) {
             $client->close();
             throw new SeleniumCrashException($e->getMessage());
@@ -45,6 +43,6 @@ class ChromeErrorRetriever implements ErrorRetriever
 
         $client->close();
 
-        return $errors;
+        return $response;
     }
 }

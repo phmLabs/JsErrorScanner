@@ -6,5 +6,5 @@ use whm\Html\Uri;
 
 interface ErrorRetriever
 {
-    public function getErrors(Uri $uri);
+    public function getResponse(Uri $uri);
 }

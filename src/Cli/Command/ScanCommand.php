@@ -8,6 +8,7 @@ use Koalamon\Client\Reporter\Event;
 use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
 use Koalamon\CookieMakerHelper\CookieMaker;
+use phm\HttpWebdriverClient\Http\Response\TimeoutAwareResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,7 +16,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
-use whm\JsErrorScanner\ErrorRetriever\PhantomJS\PhantomErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\SeleniumCrashException;
 
@@ -64,7 +64,8 @@ class ScanCommand extends Command
         }
 
         try {
-            $errors = $errorRetriever->getErrors($uri);
+            $response = $errorRetriever->getResponse($uri);
+            $errors = $response->getJavaScriptErrors();
         } catch (SeleniumCrashException $e) {
             $output->writeln(" <error> " . $e->getMessage() . " \n</error>");
             exit(1);
@@ -125,6 +126,10 @@ class ScanCommand extends Command
             }
 
             $event = new Event('JsErrorScanner_' . $input->getOption('component'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors), null, $input->getOption('component'));
+
+            if ($response instanceof TimeoutAwareResponse) {
+                $event->addAttribute(new Event\Attribute('timeout', $response->isTimeout()));
+            }
 
             try {
                 $reporter->sendEvent($event);
