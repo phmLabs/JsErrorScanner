@@ -2,9 +2,10 @@
 
 namespace whm\JsErrorScanner\ErrorRetriever;
 
+use Psr\Http\Message\RequestInterface;
 use whm\Html\Uri;
 
 interface ErrorRetriever
 {
-    public function getResponse(Uri $uri);
+    public function getResponse(RequestInterface $request);
 }

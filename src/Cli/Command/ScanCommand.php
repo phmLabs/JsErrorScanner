@@ -8,6 +8,8 @@ use Koalamon\Client\Reporter\Event;
 use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
 use Koalamon\CookieMakerHelper\CookieMaker;
+use phm\HttpWebdriverClient\Http\Request\BrowserRequest;
+use phm\HttpWebdriverClient\Http\Request\Device\DeviceFactory;
 use phm\HttpWebdriverClient\Http\Response\TimeoutAwareResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,6 +24,9 @@ use whm\JsErrorScanner\ErrorRetriever\Webdriver\SeleniumCrashException;
 
 class ScanCommand extends Command
 {
+    private $defaultHeaders = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
+
+
     protected function configure()
     {
         $this
@@ -37,6 +42,7 @@ class ScanCommand extends Command
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
                 new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/tmp/log/jserrorscanner.log'),
                 new InputOption('nocache', null, InputOption::VALUE_NONE, 'disable cache'),
+                new InputOption('device', 'd', InputOption::VALUE_OPTIONAL, 'Device', 'IPhone8'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -57,16 +63,19 @@ class ScanCommand extends Command
         /** @var ErrorRetriever $errorRetriever */
         $uri = new Uri($input->getArgument('url'));
 
+        $request = new BrowserRequest('GET', $uri, $this->defaultHeaders);
+        $request->setDevice(DeviceFactory::create($input->getOption('device')));
+
         if ($input->getOption('login')) {
             $cookies = new CookieMaker();
             $cookies = $cookies->getCookies($input->getOption('login'));
-            $uri->addCookies($cookies);
+            $request = $request->withCookies($cookies);
         }
 
         try {
-            $response = $errorRetriever->getResponse($uri);
+            $response = $errorRetriever->getResponse($request);
             $errors = $response->getJavaScriptErrors();
-        } catch (SeleniumCrashException $e) {
+        } catch (\Exception $e) {
             $output->writeln(" <error> " . $e->getMessage() . " \n</error>");
             exit(1);
         }
@@ -83,7 +92,7 @@ class ScanCommand extends Command
 
         $errorFound = false;
         $status = Event::STATUS_FAILURE;
-        $errorMsg = "";
+        $errorMsg = '';
 
         if (count($errors) > 0) {
             $errorMsg = 'JavaScript errors (' . count($errors) . ') were found on ' . $input->getArgument('url') . '<ul>';
