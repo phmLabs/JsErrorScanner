@@ -42,7 +42,7 @@ class ScanCommand extends Command
                 new InputOption('login', 'l', InputOption::VALUE_OPTIONAL, 'login params', null),
                 new InputOption('errorLog', 'e', InputOption::VALUE_OPTIONAL, 'login params', '/tmp/log/jserrorscanner.log'),
                 new InputOption('nocache', null, InputOption::VALUE_NONE, 'disable cache'),
-                new InputOption('device', 'd', InputOption::VALUE_OPTIONAL, 'Device', 'IPhone8'),
+                new InputOption('device', 'd', InputOption::VALUE_OPTIONAL, 'Device', 'MacBookPro152017'),
             ))
             ->setDescription('Check an url for js errors.')
             ->setName('scan');
@@ -64,7 +64,9 @@ class ScanCommand extends Command
         $uri = new Uri($input->getArgument('url'));
 
         $request = new BrowserRequest('GET', $uri, $this->defaultHeaders);
-        $request->setDevice(DeviceFactory::create($input->getOption('device')));
+
+        $factory = new \Leankoala\Devices\DeviceFactory();
+        $request->setDevice($factory->create($input->getOption('device')));
 
         if ($input->getOption('login')) {
             $cookies = new CookieMaker();
