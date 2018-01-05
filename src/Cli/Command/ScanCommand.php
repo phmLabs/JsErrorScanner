@@ -8,8 +8,8 @@ use Koalamon\Client\Reporter\Event;
 use Koalamon\Client\Reporter\KoalamonException;
 use Koalamon\Client\Reporter\Reporter;
 use Koalamon\CookieMakerHelper\CookieMaker;
+use Leankoala\Devices\DeviceFactory;
 use phm\HttpWebdriverClient\Http\Request\BrowserRequest;
-use phm\HttpWebdriverClient\Http\Request\Device\DeviceFactory;
 use phm\HttpWebdriverClient\Http\Response\TimeoutAwareResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use whm\Html\Uri;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 use whm\JsErrorScanner\ErrorRetriever\Webdriver\ChromeErrorRetriever;
-use whm\JsErrorScanner\ErrorRetriever\Webdriver\SeleniumCrashException;
 
 
 class ScanCommand extends Command
@@ -65,7 +64,7 @@ class ScanCommand extends Command
 
         $request = new BrowserRequest('GET', $uri, $this->defaultHeaders);
 
-        $factory = new \Leankoala\Devices\DeviceFactory();
+        $factory = new DeviceFactory();
         $request->setDevice($factory->create($input->getOption('device')));
 
         if ($input->getOption('login')) {
