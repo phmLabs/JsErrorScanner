@@ -42,7 +42,7 @@ class ChromeErrorRetriever implements ErrorRetriever
         $fallbackClient->addFallbackClient($cachedClient);
 
         try {
-            $response = $fallbackClient->sendRequest($request);
+            $response = $cachedClient->sendRequest($request);
             /** @var HeadlessChromeResponse $response */
         } catch (\Exception $e) {
             $fallbackClient->close();
