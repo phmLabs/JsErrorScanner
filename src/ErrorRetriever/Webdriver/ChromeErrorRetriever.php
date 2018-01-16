@@ -2,9 +2,12 @@
 
 namespace whm\JsErrorScanner\ErrorRetriever\Webdriver;
 
+use Leankoala\RetrieverConnector\LeanRetrieverClient;
 use phm\HttpWebdriverClient\Http\Client\Decorator\FileCacheDecorator;
+use phm\HttpWebdriverClient\Http\Client\FallbackClient;
 use phm\HttpWebdriverClient\Http\Client\HeadlessChrome\HeadlessChromeClient;
 use phm\HttpWebdriverClient\Http\Client\HeadlessChrome\HeadlessChromeResponse;
+use phm\HttpWebdriverClient\Http\Request\CacheAwareRequest;
 use Psr\Http\Message\RequestInterface;
 use whm\JsErrorScanner\ErrorRetriever\ErrorRetriever;
 
@@ -25,22 +28,28 @@ class ChromeErrorRetriever implements ErrorRetriever
      */
     public function getResponse(RequestInterface $request)
     {
-        if ($this->nocache) {
-            $client = new HeadlessChromeClient($this->clientTimeout);
-        } else {
-            $chromeClient = new HeadlessChromeClient($this->clientTimeout);
-            $client = new FileCacheDecorator($chromeClient);
+        if ($request instanceof CacheAwareRequest) {
+            $request->setIsCacheAllowed(!$this->nocache);
         }
 
+        $leanClient = new LeanRetrieverClient('http://parent:8000');
+
+        $fallbackClient = new FallbackClient($leanClient);
+
+        $chromeClient = new HeadlessChromeClient($this->clientTimeout);
+        $cachedClient = new FileCacheDecorator($chromeClient);
+
+        $fallbackClient->addFallbackClient($cachedClient);
+
         try {
-            $response = $client->sendRequest($request);
+            $response = $fallbackClient->sendRequest($request);
             /** @var HeadlessChromeResponse $response */
         } catch (\Exception $e) {
-            $client->close();
+            $fallbackClient->close();
             throw new $e;
         }
 
-        $client->close();
+        $fallbackClient->close();
 
         return $response;
     }

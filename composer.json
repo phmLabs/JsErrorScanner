@@ -12,6 +12,7 @@
     "phmLabs/httpwebdriveradapter": "dev-master",
     "koalamon/koalamonclient": "dev-master",
     "koalamon/cookiemakerhelper": "dev-master",
+    "leankoala/retrieverconnector": "dev-master",
     "facebook/webdriver": "1.1.*"
   },
   "autoload": {
