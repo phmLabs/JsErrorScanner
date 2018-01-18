@@ -32,7 +32,7 @@ class ChromeErrorRetriever implements ErrorRetriever
             $request->setIsCacheAllowed(!$this->nocache);
         }
 
-        $leanClient = new LeanRetrieverClient('http://parent:8000');
+        $leanClient = new LeanRetrieverClient(LeanRetrieverClient::guessEndpoint());
 
         $fallbackClient = new FallbackClient($leanClient);
 
@@ -42,7 +42,7 @@ class ChromeErrorRetriever implements ErrorRetriever
         $fallbackClient->addFallbackClient($cachedClient);
 
         try {
-            $response = $cachedClient->sendRequest($request);
+            $response = $fallbackClient->sendRequest($request);
             /** @var HeadlessChromeResponse $response */
         } catch (\Exception $e) {
             $fallbackClient->close();
