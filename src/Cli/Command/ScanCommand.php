@@ -11,6 +11,7 @@ use Koalamon\CookieMakerHelper\CookieMaker;
 use Leankoala\Devices\DeviceFactory;
 use phm\HttpWebdriverClient\Http\Request\BrowserRequest;
 use phm\HttpWebdriverClient\Http\Response\TimeoutAwareResponse;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,6 +26,8 @@ class ScanCommand extends Command
 {
     private $defaultHeaders = ['Accept-Encoding' => 'gzip', 'Connection' => 'keep-alive'];
 
+    const TYPE_INTERNAL = 'internal';
+    const TYPE_EXTERNAL = 'external';
 
     protected function configure()
     {
@@ -56,6 +59,10 @@ class ScanCommand extends Command
         $output->writeln("\n  <info>Checking " . $input->getArgument('url') . "</info>\n");
 
         $options = json_decode($input->getOption('options'), true);
+
+        if (!$options) {
+            $options = array();
+        }
 
         $errorRetriever = new ChromeErrorRetriever($input->getOption('nocache'), $input->getOption('client_timeout'));
 
@@ -91,8 +98,57 @@ class ScanCommand extends Command
             }
         }
 
+        $splittedErrors = $this->splitErrors($errors, $uri);
+
+        if (!array_key_exists('thirdparty', $options) or (array_key_exists('thirdparty', $options) && $options['thirdparty'] == 'on')) {
+            $external = true;
+        } else {
+            $external = false;
+        }
+
+        $this->processErrors($splittedErrors[self::TYPE_INTERNAL], self::TYPE_INTERNAL, $ignoredFiles, $response, $input, $output);
+
+        if ($external) {
+            $this->processErrors($splittedErrors[self::TYPE_EXTERNAL], self::TYPE_INTERNAL, $ignoredFiles, $response, $input, $output);
+        }
+
+        $output->writeln('');
+    }
+
+    private function splitErrors($errors, Uri $uri)
+    {
+        $splittedErrors = [self::TYPE_INTERNAL => [], self::TYPE_EXTERNAL => []];
+
+        foreach ($errors as $error) {
+            $pattern = "/at (.*?):[0-9]*:[0-9]*/";
+
+            preg_match($pattern, $error, $matches);
+
+            if (count($matches) > 0) {
+                $file = $matches[1];
+
+                $errorUri = new Uri($file);
+
+                if ($errorUri->getHost() == $uri->getHost()) {
+                    $type = self::TYPE_INTERNAL;
+                } else {
+                    $type = self::TYPE_EXTERNAL;
+                }
+            } else {
+                $type = self::TYPE_EXTERNAL;
+            }
+
+            $splittedErrors[$type][] = $error;
+
+        }
+
+        return $splittedErrors;
+    }
+
+    protected function processErrors($errors, $type, $ignoredFiles, ResponseInterface $response, InputInterface $input, OutputInterface $output)
+    {
         $errorFound = false;
-        $status = Event::STATUS_FAILURE;
+
         $errorMsg = '';
 
         if (count($errors) > 0) {
@@ -135,7 +191,15 @@ class ScanCommand extends Command
                 $system = str_replace('http://', '', $input->getArgument('url'));
             }
 
-            $event = new Event('JsErrorScanner_' . $input->getOption('component'), $system, $status, 'JsErrorScanner', $errorMsg, count($errors), null, $input->getOption('component'));
+            if ($type != self::TYPE_INTERNAL) {
+                $identifier = 'JsErrorScanner_' . $type . '_' . $input->getOption('component');
+                $tool = 'JsErrorScanner_' . $type;
+            } else {
+                $identifier = 'JsErrorScanner_' . $input->getOption('component');
+                $tool = 'JsErrorScanner';
+            }
+
+            $event = new Event($identifier, $system, $status, $tool, $errorMsg, count($errors), null, $input->getOption('component'));
 
             if ($response instanceof TimeoutAwareResponse) {
                 $event->addAttribute(new Event\Attribute('timeout', $response->isTimeout()));
@@ -145,12 +209,10 @@ class ScanCommand extends Command
                 $reporter->sendEvent($event);
             } catch (KoalamonException $e) {
                 $output->writeln('');
-                $output->writeln('<error> ' . $e->getMessage() . ' </error>');
+                $output->writeln(' <error> ' . $e->getMessage() . ' </error > ');
                 $output->writeln(' Url: ' . $e->getUrl());
                 $output->writeln(' Payload: ' . $e->getPayload());
             }
         }
-
-        $output->writeln('');
     }
 }
