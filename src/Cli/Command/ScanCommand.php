@@ -100,16 +100,16 @@ class ScanCommand extends Command
 
         $splittedErrors = $this->splitErrors($errors, $uri);
 
-        if (!array_key_exists('thirdparty', $options) or (array_key_exists('thirdparty', $options) && $options['thirdparty'] == 'on')) {
-            $external = true;
-        } else {
+        if (array_key_exists('thirdparty', $options) && $options['thirdparty'] == 'on') {
             $external = false;
+        } else {
+            $external = true;
         }
 
         $this->processErrors($splittedErrors[self::TYPE_INTERNAL], self::TYPE_INTERNAL, $ignoredFiles, $response, $input, $output);
 
         if ($external) {
-            $this->processErrors($splittedErrors[self::TYPE_EXTERNAL], self::TYPE_INTERNAL, $ignoredFiles, $response, $input, $output);
+            $this->processErrors($splittedErrors[self::TYPE_EXTERNAL], self::TYPE_EXTERNAL, $ignoredFiles, $response, $input, $output);
         }
 
         $output->writeln('');
@@ -151,8 +151,16 @@ class ScanCommand extends Command
 
         $errorMsg = '';
 
+        if ($type != self::TYPE_INTERNAL) {
+            $identifier = 'JsErrorScanner_' . $type . '_' . $input->getOption('component');
+            $tool = 'JsErrorScanner_' . $type;
+        } else {
+            $identifier = 'JsErrorScanner_' . $input->getOption('component');
+            $tool = 'JsErrorScanner';
+        }
+
         if (count($errors) > 0) {
-            $errorMsg = 'JavaScript errors (' . count($errors) . ') were found on ' . $input->getArgument('url') . '<ul>';
+            $errorMsg = 'JavaScript errors (' . count($errors) . ', ' . $type . ') were found on ' . $input->getArgument('url') . '<ul>';
 
             foreach ($errors as $error) {
 
@@ -173,7 +181,7 @@ class ScanCommand extends Command
         }
 
         if (!$errorFound) {
-            $output->writeln('   No errors found.');
+            $output->writeln('   No errors found (' . $type . ').');
             $errorMsg = 'No javascript errors found for ' . $input->getArgument('url');
             $status = Event::STATUS_SUCCESS;
         }
@@ -191,13 +199,6 @@ class ScanCommand extends Command
                 $system = str_replace('http://', '', $input->getArgument('url'));
             }
 
-            if ($type != self::TYPE_INTERNAL) {
-                $identifier = 'JsErrorScanner_' . $type . '_' . $input->getOption('component');
-                $tool = 'JsErrorScanner_' . $type;
-            } else {
-                $identifier = 'JsErrorScanner_' . $input->getOption('component');
-                $tool = 'JsErrorScanner';
-            }
 
             $event = new Event($identifier, $system, $status, $tool, $errorMsg, count($errors), null, $input->getOption('component'));
 
