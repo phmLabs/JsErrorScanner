@@ -184,6 +184,8 @@ class ScanCommand extends Command
             $output->writeln('   No errors found (' . $type . ').');
             $errorMsg = 'No javascript errors found for ' . $input->getArgument('url');
             $status = Event::STATUS_SUCCESS;
+        }else{
+            $status = Event::STATUS_FAILURE;
         }
 
         if ($input->getOption('koalamon_project_api_key')) {
