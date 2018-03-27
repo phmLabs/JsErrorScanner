@@ -88,7 +88,8 @@ class ScanCommand extends Command
             exit(1);
         }
 
-        $ignoredFiles = [];
+        // There is a bug in headless chrome that produces a ServiceWorkerRegistration error
+        $ignoredFiles = ['Failed to get a ServiceWorkerRegistration'];
 
         if (is_array($options)) {
             if (array_key_exists('excludedFiles', $options)) {
@@ -135,7 +136,7 @@ class ScanCommand extends Command
                     $type = self::TYPE_EXTERNAL;
                 }
             } else {
-                $type = self::TYPE_EXTERNAL;
+                $type = self::TYPE_INTERNAL;
             }
 
             $splittedErrors[$type][] = $error;
@@ -184,7 +185,7 @@ class ScanCommand extends Command
             $output->writeln('   No errors found (' . $type . ').');
             $errorMsg = 'No javascript errors found for ' . $input->getArgument('url');
             $status = Event::STATUS_SUCCESS;
-        }else{
+        } else {
             $status = Event::STATUS_FAILURE;
         }
 
@@ -200,7 +201,6 @@ class ScanCommand extends Command
             } else {
                 $system = str_replace('http://', '', $input->getArgument('url'));
             }
-
 
             $event = new Event($identifier, $system, $status, $tool, $errorMsg, count($errors), null, $input->getOption('component'));
 
